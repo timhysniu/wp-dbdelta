@@ -1,0 +1,20 @@
+{
+  name: "timhysniu/wp-dbdelta",
+  description: "Database change management for WP-CLI",
+  homepage: "https://github.com/timhysniu/wp-dbdelta",
+  license: "MIT",
+  require: {
+    "php": ">=5.4"
+  },
+  authors: [
+  {
+    name: "Pete Nelson",
+    email: "pete@petenelson.com"
+  }],
+  minimum-stability: "dev",
+  autoload: {
+  files: [
+    "wp-dbdelta.php"
+  ]},
+  require-dev: { }
+}
