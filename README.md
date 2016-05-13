@@ -35,6 +35,7 @@ Most of the time we just want the upgrade.
 You have the ability to run one or more patches, but by default all of them are run.
 
 `wp dbdelta up` to run all patches
+
 `wp dbdelta down 2016-05-12-insert-test-page.xml 2016-05-12-insert-test-post.xml` to run a set of patches.
 
 ### downgrade
