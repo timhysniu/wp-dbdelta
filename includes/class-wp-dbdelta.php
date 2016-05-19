@@ -3,7 +3,7 @@
  * Database Change Management for WP_CLI
  * Author: Tim Hysniu
  */
-class WP_Dbdelta extends WP_CLI_Command {
+class Db_Delta_Command extends WP_CLI_Command {
 
     private $_patch_dir = '';
     

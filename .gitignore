@@ -2,3 +2,6 @@
 composer.lock
 node_modules/
 vendor/
+.buildpath
+.project
+.settings
