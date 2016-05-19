@@ -28,6 +28,10 @@ Patch file will look like this:
 </patch>
 ```
 
+By default, patches will be created in /tmp/dbdelta directory which probably isn't the place where you want to store patches.
+To specify where you want your patches, with each subcommand (create, up, down), specify --patch-dir.
+`wp dbdelta create create-table-1 --patch-dir=/home/tim/dbdelta`
+
 Update SQL in &lt;sql&gt; for upgrade and downgrade. You can have as many SQL elements for either &lt;up&gt; or &lt;down&gt;.
 
 ### upgrade

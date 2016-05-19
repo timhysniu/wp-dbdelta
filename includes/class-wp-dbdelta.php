@@ -7,16 +7,8 @@ class Db_Delta_Command extends WP_CLI_Command {
 
     private $_patch_dir = '';
     
-    public function __construct() {
-        
-        $this->_patch_dir = defined('DB_DELTA_DIR') ? DB_DELTA_DIR : 'dbdelta';
-        if( ! file_exists($this->_patch_dir) ) {
-            if( ! mkdir($this->_patch_dir ) ) {
-                WP_CLI::error( "Could not create directory: " . $this->_patch_dir );
-                exit;
-            } 
-        }
-        
+    public function __construct() 
+    {
         $this->_create_delta_table();
     }
     
@@ -26,6 +18,7 @@ class Db_Delta_Command extends WP_CLI_Command {
      * ## EXAMPLES
      *
      *     wp create $patch_id
+     *     wp create $patch_id --patch-dir=/home/tim/patches
      */    
     public function create($args, $assoc_args)
     {
@@ -47,7 +40,9 @@ class Db_Delta_Command extends WP_CLI_Command {
         list( $id ) = $args;
         
         $filename = date("Y-m-d-") . $id . '.xml';
-        file_put_contents($this->_patch_dir . DIRECTORY_SEPARATOR . $filename, $template);
+        file_put_contents(
+            $this->_get_patch_dir($assoc_args) . DIRECTORY_SEPARATOR . $filename, 
+            $template);
     }
     
     /**
@@ -63,7 +58,7 @@ class Db_Delta_Command extends WP_CLI_Command {
      */
     public function up( $args, $assoc_args ) 
     {
-        $this->_run_patch('up', $args);
+        $this->_run_patch('up', $args, $assoc_args);
     }
     
     /**
@@ -79,12 +74,12 @@ class Db_Delta_Command extends WP_CLI_Command {
      */    
     public function down( $args, $assoc_args )
     {
-        $this->_run_patch('down', $args);
+        $this->_run_patch('down', $args, $assoc_args);
     }
     
-    private function _run_patch($command, $args)
+    private function _run_patch($command, $args, $assoc_args)
     {
-        $patches = $this->_get_patches($command, $args);
+        $patches = $this->_get_patches($command, $args, $assoc_args);
         
         if(empty($patches)) {
             WP_CLI::success( "No patches to run.");
@@ -92,7 +87,8 @@ class Db_Delta_Command extends WP_CLI_Command {
         }
         
         foreach($patches as $patch) {
-            $xml = simplexml_load_file($this->_patch_dir . DIRECTORY_SEPARATOR . $patch);
+            $xml = simplexml_load_file(
+                $this->_get_patch_dir($assoc_args) . DIRECTORY_SEPARATOR . $patch);
             $statements = isset($xml->{$command}->sql) ? $xml->{$command}->sql : array();
             
             if( empty($statements)) {
@@ -119,13 +115,13 @@ class Db_Delta_Command extends WP_CLI_Command {
         }        
     }
     
-    private function _get_patches($command, $args) 
+    private function _get_patches($command, $args, $assoc_args) 
     {
         $selected_paches = !empty($args) ? $args : array();
         $table = $this->_get_table_name();
         
         // scan directory for patches
-        $files = array_diff(scandir($this->_patch_dir), array('.', '..'));
+        $files = array_diff(scandir($this->_get_patch_dir($assoc_args)), array('.', '..'));
         
         // if a patch is specified then only that needs to run
         if(!empty($selected_paches)) {
@@ -169,6 +165,35 @@ class Db_Delta_Command extends WP_CLI_Command {
         $table = $this->_get_table_name();
         $GLOBALS['wpdb']->query(
             "DELETE FROM `$table` WHERE patch_id = '$patch'");        
+    }
+    
+    private function _get_patch_dir($assoc_args)
+    {
+        if(empty($this->patch-dir)) {
+            if(isset($assoc_args['patch-dir']) && !empty($assoc_args['patch-dir'])) {
+                $this->_patch_dir = $assoc_args['patch_dir'];
+            }
+            elseif(defined('DB_DELTA_DIR')) {
+                $this->_patch_dir = DB_DELTA_DIR;
+            }
+            else {
+                $this->_patch_dir = '/tmp/dbdelta';
+            }
+            
+            $this->_create_patch_dir();
+        }
+  
+        return $this->_patch_dir;
+    }
+    
+    private function _create_patch_dir()
+    {
+        if( ! file_exists($this->_patch_dir) ) {
+            if( ! mkdir($this->_patch_dir ) ) {
+                WP_CLI::error( "Could not create directory: " . $this->_patch_dir );
+                exit;
+            }
+        }        
     }
     
     private function _create_delta_table()
