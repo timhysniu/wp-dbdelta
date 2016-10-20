@@ -2,6 +2,7 @@
 {
     "name": "timhysniu/wp-dbdelta",
     "description": "Database change management for WP-CLI",
+    "type": "wp-cli-package",
     "homepage": "https://github.com/timhysniu/wp-dbdelta",
     "license": "MIT",
     "require": {
